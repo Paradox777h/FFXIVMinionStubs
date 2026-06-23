@@ -73,7 +73,7 @@ function ffxivminion.SwitchMode(mode) end
 ---@class MLGlobalInformation
 ml_global_information = ml_global_information or {}
 
----Toggles character auto-run movement.
+---Toggles current bot mode on / off.
 function ml_global_information.ToggleRun() end
 
 ---@class FFXIVMinion
