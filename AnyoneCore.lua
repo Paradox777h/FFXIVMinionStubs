@@ -55,6 +55,13 @@ function AnyoneCore.addWorldTextCountdownOnEnt(timer, id, color, background, siz
 ---@param uuid string UUID returned by a world text creation function.
 function AnyoneCore.removeTimedWorldText(uuid) end
 
+---@class AnyoneCore.Navigation
+AnyoneCore.Navigation = {}
+
+---Visits the specified world.
+---@param worldName string
+function AnyoneCore.Navigation.visitWorld(worldName) end
+
 ---@class AnyoneCore.API
 AnyoneCore.API = AnyoneCore.API or {}
 
@@ -62,3 +69,7 @@ AnyoneCore.API = AnyoneCore.API or {}
 ---@param filter string Filter criteria, eg. "Party"
 ---@return Entity[]|Entity
 function AnyoneCore.API.getAgnosticPartyList(filter) end
+
+---Changes to the specified instance.
+---@param instanceNumber integer
+function AnyoneCore.API.changeInstance(instanceNumber) end

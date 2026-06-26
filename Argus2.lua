@@ -7,6 +7,7 @@
 ---If omitted, renderFlags defaults to FLAG_WARP_TERRAIN (Argus2.RenderFlags.FLAG_WARP_TERRAIN).
 ---Use FLAG_OCCLUDE for invisible blocker draws; combine it with FLAG_WARP_TERRAIN when the shape should follow uneven ground.
 ---Use FLAG_OCCLUSION_BASE for the visible base draw that receives occluder cutouts, outlines, and gradients for its occlusion channel.
+---Use FLAG_RENDER_UI when 3D draws should avoid being affected by weather effects and other misc effects, but still render underneath the in-game UI and behind objects.
 ---Pass 0 for flat non-overlay rendering. Ignored when oldDraw is true.
 ---occlusionChannel is separate from renderFlags. If omitted, it defaults to channel 0. Use raw integer channel indices 0..31.
 ---Use Argus2.getNextUnusedChannel(true) when a draw needs its own available channel for this frame.
@@ -25,12 +26,10 @@ Argus2 = Argus2 or {}
 
 ---@type ShapeDrawer
 Argus2.ShapeDrawer = Argus2.ShapeDrawer or {}
-
----Returns an available occlusion channel for draws submitted during the current frame.
+---Returns an available occlusion channel for draws submitted during the current frame. Channel 0 is reserved as the default channel and is never returned.
 ---@param claim boolean? Default = false. Useful if you want to request multiple free channels at once before drawing anything.
 ---@return integer? occlusionChannel Zero-based channel index, or nil if no channel is available.
 function Argus2.getNextUnusedChannel(claim) end
-
 ---Draw a filled arrow on the ground at world coordinates for a specified duration.
 ---The arrow base/bottom is centered on x,y,z, and then rotated such that there is an arrow facing the specified heading.
 ---@param timeout integer duration of the draw
@@ -50,8 +49,9 @@ function Argus2.getNextUnusedChannel(claim) end
 ---@param targetAttachID integer? If specified, the arrow will point from it's source position (either specified or attached to entity) -> the position of targetAttach entity
 ---@param colorOutline u32color? U32 Color for outline. If unspecified, an outline is not drawn.
 ---@param outlineThickness number? Default = 1.0. If outlineThickness is specified and colorOutline is not specified, Argus will use your current color shift value based on percent complete, and the alpha will be 1.
----@param gradientIntensity integer? Default = 3. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
----@param gradientMinOpacity number? Default = 0.05. If specified, will control the minimum opacity of the gradient.
+---@param gradientDistance number? Default = 1.5. Fade distance in yalms. A value of 0 means there is no gradient, just a constant fill.
+---@param gradientMinOpacity number? Default = 0.15. If specified, will control the minimum opacity of the gradient.
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean? Default = false. If true, will use the old draw method. Can be useful for certain types of draws to always overlay on top of everything, such as drawing your partner in a mechanic where the boss model is huge.
 ---@param headingOffset number? Default = 0. Offsets the resolved heading by this fixed amount.
 ---@param keepHeading boolean? If true, preserves the heading passed in and does not overwrite it from attachment heading logic.
@@ -59,9 +59,9 @@ function Argus2.getNextUnusedChannel(claim) end
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Default = 0. Pitch in radians. 0 = ground facing.
 ---@param roll number? Default = 0. Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return string? uuid
-function Argus2.addTimedArrowFilled(timeout, x, y, z, length, baseWidth, tipLength, tipWidth, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll) end
-
+function Argus2.addTimedArrowFilled(timeout, x, y, z, length, baseWidth, tipLength, tipWidth, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 ---Draw a filled chevron on the ground at world coordinates for a specified duration.
 ---The chevron base/bottom is centered on x,y,z, and then rotated such that it is pointing towards specified heading.
 ---@param timeout integer duration of the draw
@@ -79,8 +79,9 @@ function Argus2.addTimedArrowFilled(timeout, x, y, z, length, baseWidth, tipLeng
 ---@param targetAttachID integer? If specified, the chevron will point from it's source position (either specified or attached to entity) -> the position of targetAttach entity
 ---@param colorOutline u32color? U32 Color for outline. If unspecified, an outline is not drawn.
 ---@param outlineThickness number? Default = 1.0. If outlineThickness is specified and colorOutline is not specified, Argus will use your current color shift value based on percent complete, and the alpha will be 1.
----@param gradientIntensity integer? Default = 3. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
----@param gradientMinOpacity number? Default = 0.05. If specified, will control the minimum opacity of the gradient.
+---@param gradientDistance number? Default = 1.5. Fade distance in yalms. A value of 0 means there is no gradient, just a constant fill.
+---@param gradientMinOpacity number? Default = 0.15. If specified, will control the minimum opacity of the gradient.
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean? Default = false. If true, will use the old draw method. Can be useful for certain types of draws to always overlay on top of everything, such as drawing your partner in a mechanic where the boss model is huge.
 ---@param headingOffset number? Default = 0. Offsets the resolved heading by this fixed amount.
 ---@param keepHeading boolean? If true, preserves the heading passed in and does not overwrite it from attachment heading logic.
@@ -88,9 +89,9 @@ function Argus2.addTimedArrowFilled(timeout, x, y, z, length, baseWidth, tipLeng
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Default = 0. Pitch in radians. 0 = ground facing.
 ---@param roll number? Default = 0. Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return string? uuid
-function Argus2.addTimedChevronFilled(timeout, x, y, z, length, thickness, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll) end
-
+function Argus2.addTimedChevronFilled(timeout, x, y, z, length, thickness, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 ---Draw a filled circle on the ground at world coordinates for a specified duration.
 ---@param timeout integer duration of the draw
 ---@param x number
@@ -105,17 +106,18 @@ function Argus2.addTimedChevronFilled(timeout, x, y, z, length, thickness, headi
 ---@param entityAttachID integer? Will attach to specified entity ID, and x,y,z will dynamically be changed to specified entity
 ---@param colorOutline u32color? U32 Color for outline. If unspecified, an outline is not drawn.
 ---@param outlineThickness number? Default = 1.0. If outlineThickness is specified and colorOutline is not specified, Argus will use your current color shift value based on percent complete, and the alpha will be 1.
----@param gradientIntensity integer? Default = 3. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
----@param gradientMinOpacity number? Default = 0.05. If specified, will control the minimum opacity of the gradient.
+---@param gradientDistance number? Default = 1.5. Fade distance in yalms. A value of 0 means there is no gradient, just a constant fill.
+---@param gradientMinOpacity number? Default = 0.15. If specified, will control the minimum opacity of the gradient.
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean? Default = false. If true, will use the old draw method. Can be useful for certain types of draws to always overlay on top of everything, such as drawing your partner in a mechanic where the boss model is huge.
 ---@param doNotDetect boolean? Default = false. If true, this custom draw will not be used for aoe detection (i.e. safe jump)
 ---@param renderFlags ArgusRenderFlags? Default = FLAG_WARP_TERRAIN (Argus2.RenderFlags.FLAG_WARP_TERRAIN). Pass 0 for flat non-overlay rendering. Ignored when oldDraw is true.
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Default = 0. Pitch in radians. 0 = ground facing.
 ---@param roll number? Default = 0. Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return string? uuid
-function Argus2.addTimedCircleFilled(timeout, x, y, z, radius, segments, colorStart, colorEnd, colorMid, delay, entityAttachID, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, doNotDetect, renderFlags, occlusionChannel, pitch, roll) end
-
+function Argus2.addTimedCircleFilled(timeout, x, y, z, radius, segments, colorStart, colorEnd, colorMid, delay, entityAttachID, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, doNotDetect, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 ---Draw a timed cone on the ground at world coordinates for a specified duration.
 ---The cone originates from x,y,z, and will go in the direction of heading.
 ---@param timeout integer duration of the draw
@@ -134,8 +136,9 @@ function Argus2.addTimedCircleFilled(timeout, x, y, z, radius, segments, colorSt
 ---@param targetAttachID integer? If specified, the cone will be drawn from it's source position (either specified or attached to entity) and stopping at the position of targetAttach entity.
 ---@param colorOutline u32color? U32 Color for outline. If unspecified, an outline is not drawn.
 ---@param outlineThickness number? Default = 1.0. If outlineThickness is specified and colorOutline is not specified, Argus will use your current color shift value based on percent complete, and the alpha will be 1.
----@param gradientIntensity integer? Default = 4. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
----@param gradientMinOpacity number? Default = 0.05. If specified, will control the minimum opacity of the gradient.
+---@param gradientDistance number? Default = 1.5. Fade distance in yalms. A value of 0 means there is no gradient, just a constant fill.
+---@param gradientMinOpacity number? Default = 0.15. If specified, will control the minimum opacity of the gradient.
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean? Default = false. If true, will use the old draw method. Can be useful for certain types of draws to always overlay on top of everything, such as drawing your partner in a mechanic where the boss model is huge.
 ---@param doNotDetect boolean? Default = false. If true, this custom draw will not be used for aoe detection (i.e. safe jump)
 ---@param headingOffset number? Default = 0. Offsets the resolved heading by this fixed amount.
@@ -144,9 +147,9 @@ function Argus2.addTimedCircleFilled(timeout, x, y, z, radius, segments, colorSt
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Default = 0. Pitch in radians. 0 = ground facing.
 ---@param roll number? Default = 0. Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return string? uuid
-function Argus2.addTimedConeFilled(timeout, x, y, z, radius, angle, heading, segments, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll) end
-
+function Argus2.addTimedConeFilled(timeout, x, y, z, radius, angle, heading, segments, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 ---Draw a filled cross on the ground at world coordinates for a specified duration.
 ---The cross is centered on x,y,z, and then rotated such that there is a rectangle facing the specified heading.
 ---@param timeout integer duration of the draw
@@ -164,8 +167,9 @@ function Argus2.addTimedConeFilled(timeout, x, y, z, radius, angle, heading, seg
 ---@param targetAttachID integer? If specified, the cone will be drawn from it's source position (either specified or attached to entity) and stopping at the position of targetAttach entity.
 ---@param colorOutline u32color? U32 Color for outline. If unspecified, an outline is not drawn.
 ---@param outlineThickness number? Default = 1.0. If outlineThickness is specified and colorOutline is not specified, Argus will use your current color shift value based on percent complete, and the alpha will be 1.
----@param gradientIntensity integer? Default = 4. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
----@param gradientMinOpacity number? Default = 0.05. If specified, will control the minimum opacity of the gradient.
+---@param gradientDistance number? Default = 1.5. Fade distance in yalms. A value of 0 means there is no gradient, just a constant fill.
+---@param gradientMinOpacity number? Default = 0.15. If specified, will control the minimum opacity of the gradient.
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean? Default = false. If true, will use the old draw method. Can be useful for certain types of draws to always overlay on top of everything, such as drawing your partner in a mechanic where the boss model is huge.
 ---@param doNotDetect boolean? Default = false. If true, this custom draw will not be used for aoe detection (i.e. safe jump)
 ---@param headingOffset number? Default = 0. Offsets the resolved heading by this fixed amount.
@@ -174,9 +178,9 @@ function Argus2.addTimedConeFilled(timeout, x, y, z, radius, angle, heading, seg
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Default = 0. Pitch in radians. 0 = ground facing.
 ---@param roll number? Default = 0. Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return string? uuid
-function Argus2.addTimedCrossFilled(timeout, x, y, z, length, width, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll) end
-
+function Argus2.addTimedCrossFilled(timeout, x, y, z, length, width, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 ---Draw a filled donut (torus) on the ground at world coordinates for a specified duration.
 ---@param timeout integer duration of the draw
 ---@param x number
@@ -192,16 +196,18 @@ function Argus2.addTimedCrossFilled(timeout, x, y, z, length, width, heading, co
 ---@param entityAttachID integer? Will attach to specified entity ID, and x,y,z will dynamically be changed to specified entity
 ---@param colorOutline u32color? U32 Color for outline. If unspecified, an outline is not drawn.
 ---@param outlineThickness number? Default = 1.0. If outlineThickness is specified and colorOutline is not specified, Argus will use your current color shift value based on percent complete, and the alpha will be 1.
----@param gradientIntensity integer? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
+---@param gradientDistance number? Default = 1.5. Fade distance in yalms. A value of 0 means there is no gradient, just a constant fill.
 ---@param gradientMinOpacity number? Default = 0.15. If specified, will control the minimum opacity of the gradient.
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean? Default = false. If true, will use the old draw method. Can be useful for certain types of draws to always overlay on top of everything, such as drawing your partner in a mechanic where the boss model is huge.
 ---@param doNotDetect boolean? Default = false. If true, this custom draw will not be used for aoe detection (i.e. safe jump)
 ---@param renderFlags ArgusRenderFlags? Default = FLAG_WARP_TERRAIN (Argus2.RenderFlags.FLAG_WARP_TERRAIN). Pass 0 for flat non-overlay rendering. Ignored when oldDraw is true.
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Default = 0. Pitch in radians. 0 = ground facing.
 ---@param roll number? Default = 0. Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return string? uuid
-function Argus2.addTimedDonutFilled(timeout, x, y, z, radiusInner, radiusOuter, segments, colorStart, colorEnd, colorMid, delay, entityAttachID, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, doNotDetect, renderFlags, occlusionChannel, pitch, roll) end
+function Argus2.addTimedDonutFilled(timeout, x, y, z, radiusInner, radiusOuter, segments, colorStart, colorEnd, colorMid, delay, entityAttachID, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, doNotDetect, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 
 ---Draw a timed line between two world coordinate positions for a specified duration.
 ---@param timeout integer duration of the draw
@@ -217,7 +223,6 @@ function Argus2.addTimedDonutFilled(timeout, x, y, z, radiusInner, radiusOuter, 
 ---@param endpointThickness number
 ---@return string? uuid
 function Argus2.addTimedLineFilled(timeout, x1, y1, z1, x2, y2, z2, delay, colorFill, outlineThickness, endpointThickness) end
-
 ---Draw a filled rectangle on the ground at world coordinates for a specified duration.
 ---The rectangle originates from x,y,z, and will go width/2 yalms out in each direction up and down, then length yalms out in the direction of heading.
 ---@param timeout integer duration of the draw
@@ -236,8 +241,9 @@ function Argus2.addTimedLineFilled(timeout, x1, y1, z1, x2, y2, z2, delay, color
 ---@param keepLength boolean? If specified with targetAttach, then the length won't be adjusted to the target, the length will stay constant.
 ---@param colorOutline u32color? U32 Color for outline. If unspecified, an outline is not drawn.
 ---@param outlineThickness number? If outlineThickness is specified and colorOutline is not specified, Argus will use your current color shift value based on percent complete, and the alpha will be 1.
----@param gradientIntensity integer? Default = 4. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
----@param gradientMinOpacity number? Default = 0.05. If specified, will control the minimum opacity of the gradient.
+---@param gradientDistance number? Default = 1.5. Fade distance in yalms. A value of 0 means there is no gradient, just a constant fill.
+---@param gradientMinOpacity number? Default = 0.15. If specified, will control the minimum opacity of the gradient.
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean? Default = false. If true, will use the old draw method. Can be useful for certain types of draws to always overlay on top of everything, such as drawing your partner in a mechanic where the boss model is huge.
 ---@param doNotDetect boolean? Default = false. If true, this custom draw will not be used for aoe detection (i.e. safe jump)
 ---@param headingOffset number? Default = 0. Offsets the resolved heading by this fixed amount.
@@ -246,9 +252,9 @@ function Argus2.addTimedLineFilled(timeout, x1, y1, z1, x2, y2, z2, delay, color
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Default = 0. Pitch in radians. 0 = ground facing.
 ---@param roll number? Default = 0. Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return string? uuid
-function Argus2.addTimedRectFilled(timeout, x, y, z, length, width, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, keepLength, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll) end
-
+function Argus2.addTimedRectFilled(timeout, x, y, z, length, width, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, keepLength, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 ---Draw a filled centered rectangle on the ground at world coordinates for a specified duration.
 ---The rectangle is centered on x,y,z, and is rotated to face the specified heading.
 ---@param timeout integer duration of the draw
@@ -267,8 +273,9 @@ function Argus2.addTimedRectFilled(timeout, x, y, z, length, width, heading, col
 ---@param keepLength boolean? If specified with targetAttach, then the length won't be adjusted to the target, the length will stay constant.
 ---@param colorOutline u32color? U32 Color for outline. If unspecified, an outline is not drawn.
 ---@param outlineThickness number? If outlineThickness is specified and colorOutline is not specified, Argus will use your current color shift value based on percent complete, and the alpha will be 1.
----@param gradientIntensity integer? Default = 4. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
----@param gradientMinOpacity number? Default = 0.05. If specified, will control the minimum opacity of the gradient.
+---@param gradientDistance number? Default = 1.5. Fade distance in yalms. A value of 0 means there is no gradient, just a constant fill.
+---@param gradientMinOpacity number? Default = 0.15. If specified, will control the minimum opacity of the gradient.
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean? Default = false. If true, will use the old draw method. Can be useful for certain types of draws to always overlay on top of everything, such as drawing your partner in a mechanic where the boss model is huge.
 ---@param doNotDetect boolean? Default = false. If true, this custom draw will not be used for aoe detection (i.e. safe jump)
 ---@param headingOffset number? Default = 0. Offsets the resolved heading by this fixed amount.
@@ -277,9 +284,9 @@ function Argus2.addTimedRectFilled(timeout, x, y, z, length, width, heading, col
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Default = 0. Pitch in radians. 0 = ground facing.
 ---@param roll number? Default = 0. Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return string? uuid
-function Argus2.addTimedCenteredRectFilled(timeout, x, y, z, length, width, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, keepLength, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll) end
-
+function Argus2.addTimedCenteredRectFilled(timeout, x, y, z, length, width, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, keepLength, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 ---Draw a filled donut (torus) on the ground at world coordinates for a specified duration.
 ---@param timeout integer duration of the draw
 ---@param x number
@@ -298,8 +305,9 @@ function Argus2.addTimedCenteredRectFilled(timeout, x, y, z, length, width, head
 ---@param targetAttachID integer? If specified, the cone will be drawn from it's source position (either specified or attached to entity) and stopping at the position of targetAttach entity.
 ---@param colorOutline u32color? U32 Color for outline. If unspecified, an outline is not drawn.
 ---@param outlineThickness number? Default = 1.0. If outlineThickness is specified and colorOutline is not specified, Argus will use your current color shift value based on percent complete, and the alpha will be 1.
----@param gradientIntensity integer? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
+---@param gradientDistance number? Default = 1.5. Fade distance in yalms. A value of 0 means there is no gradient, just a constant fill.
 ---@param gradientMinOpacity number? Default = 0.15. If specified, will control the minimum opacity of the gradient.
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean? Default = false. If true, will use the old draw method. Can be useful for certain types of draws to always overlay on top of everything, such as drawing your partner in a mechanic where the boss model is huge.
 ---@param doNotDetect boolean? Default = false. If true, this custom draw will not be used for aoe detection (i.e. safe jump)
 ---@param headingOffset number? Default = 0. Offsets the resolved heading by this fixed amount.
@@ -308,9 +316,9 @@ function Argus2.addTimedCenteredRectFilled(timeout, x, y, z, length, width, head
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Default = 0. Pitch in radians. 0 = ground facing.
 ---@param roll number? Default = 0. Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return string? uuid
-function Argus2.addTimedDonutConeFilled(timeout, x, y, z, radiusInner, radiusOuter, angle, heading, segments, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll) end
-
+function Argus2.addTimedDonutConeFilled(timeout, x, y, z, radiusInner, radiusOuter, angle, heading, segments, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 ---@param uuid string
 ---@param timeout integer?
 ---@param x number?
@@ -329,8 +337,9 @@ function Argus2.addTimedDonutConeFilled(timeout, x, y, z, radiusInner, radiusOut
 ---@param targetAttachID integer?
 ---@param colorOutline u32color?
 ---@param outlineThickness number?
----@param gradientIntensity number?
+---@param gradientDistance number?
 ---@param gradientMinOpacity number?
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean?
 ---@param headingOffset number?
 ---@param keepHeading boolean?
@@ -338,9 +347,9 @@ function Argus2.addTimedDonutConeFilled(timeout, x, y, z, radiusInner, radiusOut
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Pitch in radians. 0 = ground facing.
 ---@param roll number? Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return boolean success True if update succeeded.
-function Argus2.updateTimedArrow(uuid, timeout, x, y, z, length, baseWidth, tipLength, tipWidth, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll) end
-
+function Argus2.updateTimedArrow(uuid, timeout, x, y, z, length, baseWidth, tipLength, tipWidth, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 ---@param uuid string
 ---@param timeout integer?
 ---@param x number?
@@ -358,8 +367,9 @@ function Argus2.updateTimedArrow(uuid, timeout, x, y, z, length, baseWidth, tipL
 ---@param keepLength boolean?
 ---@param colorOutline u32color?
 ---@param outlineThickness number?
----@param gradientIntensity number?
+---@param gradientDistance number?
 ---@param gradientMinOpacity number?
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean?
 ---@param doNotDetect boolean?
 ---@param headingOffset number?
@@ -368,9 +378,9 @@ function Argus2.updateTimedArrow(uuid, timeout, x, y, z, length, baseWidth, tipL
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Pitch in radians. 0 = ground facing.
 ---@param roll number? Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return boolean success True if update succeeded.
-function Argus2.updateTimedCenteredRect(uuid, timeout, x, y, z, length, width, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, keepLength, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll) end
-
+function Argus2.updateTimedCenteredRect(uuid, timeout, x, y, z, length, width, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, keepLength, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 ---@param uuid string
 ---@param timeout integer?
 ---@param x number?
@@ -387,8 +397,9 @@ function Argus2.updateTimedCenteredRect(uuid, timeout, x, y, z, length, width, h
 ---@param targetAttachID integer?
 ---@param colorOutline u32color?
 ---@param outlineThickness number?
----@param gradientIntensity number?
+---@param gradientDistance number?
 ---@param gradientMinOpacity number?
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean?
 ---@param headingOffset number?
 ---@param keepHeading boolean?
@@ -396,9 +407,9 @@ function Argus2.updateTimedCenteredRect(uuid, timeout, x, y, z, length, width, h
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Pitch in radians. 0 = ground facing.
 ---@param roll number? Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return boolean success True if update succeeded.
-function Argus2.updateTimedChevron(uuid, timeout, x, y, z, length, thickness, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll) end
-
+function Argus2.updateTimedChevron(uuid, timeout, x, y, z, length, thickness, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 ---@param uuid string
 ---@param timeout integer?
 ---@param x number?
@@ -413,17 +424,18 @@ function Argus2.updateTimedChevron(uuid, timeout, x, y, z, length, thickness, he
 ---@param entityAttachID integer?
 ---@param colorOutline u32color?
 ---@param outlineThickness number?
----@param gradientIntensity number?
+---@param gradientDistance number?
 ---@param gradientMinOpacity number?
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean?
 ---@param doNotDetect boolean?
 ---@param renderFlags ArgusRenderFlags? Default = FLAG_WARP_TERRAIN (Argus2.RenderFlags.FLAG_WARP_TERRAIN). Pass 0 for flat non-overlay rendering. Ignored when oldDraw is true.
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Pitch in radians. 0 = ground facing.
 ---@param roll number? Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return boolean success True if update succeeded.
-function Argus2.updateTimedCircle(uuid, timeout, x, y, z, radius, segments, colorStart, colorEnd, colorMid, delay, entityAttachID, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, doNotDetect, renderFlags, occlusionChannel, pitch, roll) end
-
+function Argus2.updateTimedCircle(uuid, timeout, x, y, z, radius, segments, colorStart, colorEnd, colorMid, delay, entityAttachID, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, doNotDetect, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 ---@param uuid string
 ---@param timeout integer?
 ---@param x number?
@@ -441,8 +453,9 @@ function Argus2.updateTimedCircle(uuid, timeout, x, y, z, radius, segments, colo
 ---@param targetAttachID integer?
 ---@param colorOutline u32color?
 ---@param outlineThickness number?
----@param gradientIntensity number?
+---@param gradientDistance number?
 ---@param gradientMinOpacity number?
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean?
 ---@param doNotDetect boolean?
 ---@param headingOffset number?
@@ -451,9 +464,9 @@ function Argus2.updateTimedCircle(uuid, timeout, x, y, z, radius, segments, colo
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Pitch in radians. 0 = ground facing.
 ---@param roll number? Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return boolean success True if update succeeded.
-function Argus2.updateTimedCone(uuid, timeout, x, y, z, radius, angle, heading, segments, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll) end
-
+function Argus2.updateTimedCone(uuid, timeout, x, y, z, radius, angle, heading, segments, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 ---@param uuid string
 ---@param timeout integer?
 ---@param x number?
@@ -470,8 +483,9 @@ function Argus2.updateTimedCone(uuid, timeout, x, y, z, radius, angle, heading, 
 ---@param targetAttachID integer?
 ---@param colorOutline u32color?
 ---@param outlineThickness number?
----@param gradientIntensity number?
+---@param gradientDistance number?
 ---@param gradientMinOpacity number?
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean?
 ---@param doNotDetect boolean?
 ---@param headingOffset number?
@@ -480,9 +494,9 @@ function Argus2.updateTimedCone(uuid, timeout, x, y, z, radius, angle, heading, 
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Pitch in radians. 0 = ground facing.
 ---@param roll number? Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return boolean success True if update succeeded.
-function Argus2.updateTimedCross(uuid, timeout, x, y, z, length, width, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll) end
-
+function Argus2.updateTimedCross(uuid, timeout, x, y, z, length, width, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 ---@param uuid string
 ---@param timeout integer?
 ---@param x number?
@@ -498,17 +512,18 @@ function Argus2.updateTimedCross(uuid, timeout, x, y, z, length, width, heading,
 ---@param entityAttachID integer?
 ---@param colorOutline u32color?
 ---@param outlineThickness number?
----@param gradientIntensity number?
+---@param gradientDistance number?
 ---@param gradientMinOpacity number?
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean?
 ---@param doNotDetect boolean?
 ---@param renderFlags ArgusRenderFlags? Default = FLAG_WARP_TERRAIN (Argus2.RenderFlags.FLAG_WARP_TERRAIN). Pass 0 for flat non-overlay rendering. Ignored when oldDraw is true.
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Pitch in radians. 0 = ground facing.
 ---@param roll number? Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return boolean success True if update succeeded.
-function Argus2.updateTimedDonut(uuid, timeout, x, y, z, radiusInner, radiusOuter, segments, colorStart, colorEnd, colorMid, delay, entityAttachID, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, doNotDetect, renderFlags, occlusionChannel, pitch, roll) end
-
+function Argus2.updateTimedDonut(uuid, timeout, x, y, z, radiusInner, radiusOuter, segments, colorStart, colorEnd, colorMid, delay, entityAttachID, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, doNotDetect, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 ---@param uuid string
 ---@param timeout integer?
 ---@param x number?
@@ -527,8 +542,9 @@ function Argus2.updateTimedDonut(uuid, timeout, x, y, z, radiusInner, radiusOute
 ---@param targetAttachID integer?
 ---@param colorOutline u32color?
 ---@param outlineThickness number?
----@param gradientIntensity number?
+---@param gradientDistance number?
 ---@param gradientMinOpacity number?
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean?
 ---@param doNotDetect boolean?
 ---@param headingOffset number?
@@ -537,8 +553,9 @@ function Argus2.updateTimedDonut(uuid, timeout, x, y, z, radiusInner, radiusOute
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Pitch in radians. 0 = ground facing.
 ---@param roll number? Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return boolean success True if update succeeded.
-function Argus2.updateTimedDonutCone(uuid, timeout, x, y, z, radiusInner, radiusOuter, angle, heading, segments, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll) end
+function Argus2.updateTimedDonutCone(uuid, timeout, x, y, z, radiusInner, radiusOuter, angle, heading, segments, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 
 ---@param uuid string
 ---@param timeout integer?
@@ -554,7 +571,6 @@ function Argus2.updateTimedDonutCone(uuid, timeout, x, y, z, radiusInner, radius
 ---@param endpointThickness number?
 ---@return boolean success True if update succeeded.
 function Argus2.updateTimedLine(uuid, timeout, x1, y1, z1, x2, y2, z2, delay, colorFill, outlineThickness, endpointThickness) end
-
 ---@param uuid string
 ---@param timeout integer?
 ---@param x number?
@@ -572,8 +588,9 @@ function Argus2.updateTimedLine(uuid, timeout, x1, y1, z1, x2, y2, z2, delay, co
 ---@param keepLength boolean?
 ---@param colorOutline u32color?
 ---@param outlineThickness number?
----@param gradientIntensity number?
+---@param gradientDistance number?
 ---@param gradientMinOpacity number?
+---@param gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
 ---@param oldDraw boolean?
 ---@param doNotDetect boolean?
 ---@param headingOffset number?
@@ -582,8 +599,9 @@ function Argus2.updateTimedLine(uuid, timeout, x1, y1, z1, x2, y2, z2, delay, co
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31. Ignored when oldDraw is true.
 ---@param pitch number? Pitch in radians. 0 = ground facing.
 ---@param roll number? Roll in radians.
+---@param heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ---@return boolean success True if update succeeded.
-function Argus2.updateTimedRect(uuid, timeout, x, y, z, length, width, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, keepLength, colorOutline, outlineThickness, gradientIntensity, gradientMinOpacity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll) end
+function Argus2.updateTimedRect(uuid, timeout, x, y, z, length, width, heading, colorStart, colorEnd, colorMid, delay, entityAttachID, targetAttachID, keepLength, colorOutline, outlineThickness, gradientDistance, gradientMinOpacity, gradientIntensity, oldDraw, doNotDetect, headingOffset, keepHeading, renderFlags, occlusionChannel, pitch, roll, heightOffset) end
 
 ---World Draw Helpers
 ---@param colorStart u32color? If not using timed draws, this can be left nil, only colorEnd will be used for frame draws
@@ -612,7 +630,6 @@ function Argus2.ShapeDrawer:new(colorStart, colorMid, colorEnd, colorOutline, ou
 ---@param pitch number? Default = 0. Pitch in radians. 0 = ground facing.
 ---@param roll number? Default = 0. Roll in radians.
 function Argus2.addTextureFilled(x, y, z, heading, filename, imageSizeX, imageSizeY, sizeX, sizeY, color, renderFlags, occlusionChannel, pitch, roll) end
-
 ---Draw a textured rectangle centered at world coordinates for this frame, facing the camera position. The rectangle uses heading as image rotation.
 ---@param x number
 ---@param y number
@@ -624,10 +641,9 @@ function Argus2.addTextureFilled(x, y, z, heading, filename, imageSizeX, imageSi
 ---@param sizeX number
 ---@param sizeY number
 ---@param color u32color Texture tint color.
----@param renderFlags ArgusRenderFlags? Default = FLAG_WARP_TERRAIN (Argus2.RenderFlags.FLAG_WARP_TERRAIN). Pass 0 for flat non-overlay rendering.
+---@param renderFlags ArgusRenderFlags? Default = Argus2.RenderFlags.FLAG_RENDER_UI.
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31.
 function Argus2.addCameraFacingTextureFilled(x, y, z, heading, filename, imageSizeX, imageSizeY, sizeX, sizeY, color, renderFlags, occlusionChannel) end
-
 ---Draw a textured rectangle centered at world coordinates for this frame, facing the screen. The rectangle uses heading as image rotation.
 ---@param x number
 ---@param y number
@@ -639,7 +655,7 @@ function Argus2.addCameraFacingTextureFilled(x, y, z, heading, filename, imageSi
 ---@param sizeX number
 ---@param sizeY number
 ---@param color u32color Texture tint color.
----@param renderFlags ArgusRenderFlags? Default = FLAG_WARP_TERRAIN (Argus2.RenderFlags.FLAG_WARP_TERRAIN). Pass 0 for flat non-overlay rendering.
+---@param renderFlags ArgusRenderFlags? Default = Argus2.RenderFlags.FLAG_RENDER_UI.
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31.
 function Argus2.addScreenFacingTextureFilled(x, y, z, heading, filename, imageSizeX, imageSizeY, sizeX, sizeY, color, renderFlags, occlusionChannel) end
 

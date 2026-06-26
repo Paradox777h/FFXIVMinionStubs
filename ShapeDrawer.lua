@@ -14,29 +14,48 @@ Argus2.ShapeDrawer = Argus2.ShapeDrawer or {}
 ---@field segments integer
 ---@field occlusionChannel integer? Zero-based channel index used by ShapeDrawer methods; valid range is 0..31.
 ---@field renderFlags ArgusRenderFlags? Default = Argus2.RenderFlags.FLAG_WARP_TERRAIN. Base render flags used by ShapeDrawer methods.
----@field gradientIntensity integer?
----@field gradientMinOpacity number?
+---@field gradientDistance number? Default = 1.5. Fade distance in yalms. A value of 0 means there is no gradient, just a constant fill.
+---@field gradientMinOpacity number? Default = 0.15.
+---@field gradientIntensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
+---@field heightOffset number? Offset for entity-attached timed draw y coordinates. Applied only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
 ShapeDrawer = ShapeDrawer or {}
 
-function Argus2.ShapeDrawer:new(colorStart, colorMid, colorEnd, colorOutline, outlineThickness) end
-
 ---Create a new shape drawer object. It will use the color values specified. You can also freely edit the color values at any point in time.
----@param colorStart? u32color If not using timed draws, this can be nil; only colorEnd will be used for frame draws.
----@param colorMid? u32color If not specified, colorMid is ignored in timed draws and goes colorStart -> colorEnd. Frame draws only use colorEnd.
+---@param colorStart u32color? If not using timed draws, this can be nil; only colorEnd will be used for frame draws.
+---@param colorMid u32color? If not specified, colorMid is ignored in timed draws and goes colorStart -> colorEnd. Frame draws only use colorEnd.
 ---@param colorEnd u32color Required for timed draws and frame draws.
----@param colorOutline u32color
----@param outlineThickness? number Default 1.5.
+---@param colorOutline u32color?
+---@param outlineThickness number? Default = 1.5.
+---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31.
+---@param renderFlags ArgusRenderFlags? Default = Argus2.RenderFlags.FLAG_WARP_TERRAIN. Base render flags used by ShapeDrawer methods.
 ---@return ShapeDrawer
-function ShapeDrawer:new(colorStart, colorMid, colorEnd, colorOutline, outlineThickness) end
+function ShapeDrawer:new(colorStart, colorMid, colorEnd, colorOutline, outlineThickness, occlusionChannel, renderFlags) end
 
----Create a new shape drawer object.
----@param colorStart? u32color
----@param colorMid? u32color
----@param colorEnd u32color
----@param colorOutline u32color
----@param outlineThickness? number
+---World Draw Helpers
+---@param colorStart u32color? If not using timed draws, this can be left nil, only colorEnd will be used for frame draws.
+---@param colorMid u32color? If not specified, colorMid is ignored in timed draws and goes colorStart -> colorEnd. Frame draws only use colorEnd.
+---@param colorEnd u32color Required for timed draws and frame draws.
+---@param colorOutline u32color?
+---@param outlineThickness number? Default = 1.5.
+---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31.
+---@param renderFlags ArgusRenderFlags? Default = Argus2.RenderFlags.FLAG_WARP_TERRAIN. Base render flags used by ShapeDrawer methods.
 ---@return ShapeDrawer
-function Argus2.ShapeDrawer:new(colorStart, colorMid, colorEnd, colorOutline, outlineThickness) end
+function Argus2.ShapeDrawer:new(colorStart, colorMid, colorEnd, colorOutline, outlineThickness, occlusionChannel, renderFlags) end
+
+---@param distance number? Default = 1.5. Fade distance in yalms. A value of 0 means there is no gradient, just a constant fill.
+---@param minOpacity number? Default = 0.15.
+---@param intensity number? Default = 2. If specified, will control how quickly the gradient fades to minOpacity. A value of 0 means there is no gradient, just a constant fill.
+function ShapeDrawer:setGradient(distance, minOpacity, intensity) end
+
+---Sets this drawer's timed and frame draw colors.
+---@param colorEnd u32color? If nil, leaves the existing colorEnd unchanged.
+---@param colorStart u32color? If nil, leaves the existing colorStart unchanged.
+---@param colorMid u32color? If nil, leaves the existing colorMid unchanged.
+function ShapeDrawer:setColor(colorEnd, colorStart, colorMid) end
+
+---Sets a y offset for entity-attached timed draws created or updated by this drawer. Argus applies it only when the draw's renderFlags omit FLAG_WARP_TERRAIN.
+---@param heightOffset number?
+function ShapeDrawer:setHeightOffset(heightOffset) end
 
 ---Draw an arrow on the ground for this frame.
 ---@param x number
@@ -347,10 +366,6 @@ function ShapeDrawer:addTimedRect(timeout, x, y, z, length, width, heading, dela
 ---@param renderFlags ArgusRenderFlags? Overrides this drawer's renderFlags for this call.
 ---@return string? uuid
 function ShapeDrawer:addTimedRectOnEnt(timeout, entID, length, width, targetID, delay, keepLength, oldDraw, doNotDetect, headingOffset, offsetIsAbsolute, renderFlags) end
-
----@param intensity integer?
----@param minOpacity number?
-function ShapeDrawer:setGradient(intensity, minOpacity) end
 
 ---Draw a filled rectangle on the ground at world coordinates for this frame.
 ---XYZ pos is the center of the rectangle. The rectangle will be created outwards in length / 2, extended in width / 2, and then rotated to the heading.
@@ -845,7 +860,6 @@ function ShapeDrawer:addTexture(x, y, z, heading, filename, imageSizeX, imageSiz
 ---@param sizeY number
 ---@param renderFlags ArgusRenderFlags? Overrides this drawer's renderFlags for this call.
 function ShapeDrawer:addTexture3D(x, y, z, heading, pitch, roll, filename, imageSizeX, imageSizeY, sizeX, sizeY, renderFlags) end
-
 ---Draw a textured rectangle centered at world coordinates for this frame, facing the camera position. Uses the drawer's colorEnd as the texture tint and the drawer's occlusionChannel.
 ---@param x number
 ---@param y number
@@ -856,9 +870,8 @@ function ShapeDrawer:addTexture3D(x, y, z, heading, pitch, roll, filename, image
 ---@param imageSizeY number Image resize height. Use 0 to keep the source height.
 ---@param sizeX number
 ---@param sizeY number
----@param renderFlags ArgusRenderFlags? Overrides this drawer's renderFlags for this call.
+---@param renderFlags ArgusRenderFlags? Overrides the default Argus2.RenderFlags.FLAG_RENDER_UI for this call.
 function ShapeDrawer:addCameraFacingTexture(x, y, z, heading, filename, imageSizeX, imageSizeY, sizeX, sizeY, renderFlags) end
-
 ---Draw a textured rectangle centered at world coordinates for this frame, facing the screen. Uses the drawer's colorEnd as the texture tint and the drawer's occlusionChannel.
 ---@param x number
 ---@param y number
@@ -869,7 +882,7 @@ function ShapeDrawer:addCameraFacingTexture(x, y, z, heading, filename, imageSiz
 ---@param imageSizeY number Image resize height. Use 0 to keep the source height.
 ---@param sizeX number
 ---@param sizeY number
----@param renderFlags ArgusRenderFlags? Overrides this drawer's renderFlags for this call.
+---@param renderFlags ArgusRenderFlags? Overrides the default Argus2.RenderFlags.FLAG_RENDER_UI for this call.
 function ShapeDrawer:addScreenFacingTexture(x, y, z, heading, filename, imageSizeX, imageSizeY, sizeX, sizeY, renderFlags) end
 
 ---Draw a textured rectangle centered at world coordinates for timeout milliseconds. Uses the drawer's color gradient and occlusionChannel.
@@ -887,7 +900,6 @@ function ShapeDrawer:addScreenFacingTexture(x, y, z, heading, filename, imageSiz
 ---@param renderFlags ArgusRenderFlags? Overrides this drawer's renderFlags for this call.
 ---@return string? uuid
 function ShapeDrawer:addTimedTexture(timeout, x, y, z, heading, filename, imageSizeX, imageSizeY, sizeX, sizeY, delay, renderFlags) end
-
 ---Draw a textured rectangle centered at world coordinates for timeout milliseconds, facing the camera. Uses the drawer's color gradient and occlusionChannel.
 ---@param timeout number Milliseconds to draw the texture for.
 ---@param x number
@@ -900,7 +912,7 @@ function ShapeDrawer:addTimedTexture(timeout, x, y, z, heading, filename, imageS
 ---@param sizeX number
 ---@param sizeY number
 ---@param delay number? Default = 0.0. Milliseconds to delay the start of the draw.
----@param renderFlags ArgusRenderFlags? Overrides this drawer's renderFlags for this call.
+---@param renderFlags ArgusRenderFlags? Overrides the default Argus2.RenderFlags.FLAG_RENDER_UI for this call.
 ---@return string? uuid
 function ShapeDrawer:addTimedCameraFacingTexture(timeout, x, y, z, heading, filename, imageSizeX, imageSizeY, sizeX, sizeY, delay, renderFlags) end
 
@@ -937,7 +949,6 @@ function ShapeDrawer:addTimedTexture3D(timeout, x, y, z, heading, pitch, roll, f
 ---@param renderFlags ArgusRenderFlags? Overrides this drawer's renderFlags for this call.
 ---@return boolean success True if update succeeded.
 function ShapeDrawer:updateTimedTexture(uuid, timeout, x, y, z, heading, filename, imageSizeX, imageSizeY, sizeX, sizeY, delay, renderFlags) end
-
 ---@param uuid string
 ---@param timeout number?
 ---@param x number?
@@ -950,7 +961,7 @@ function ShapeDrawer:updateTimedTexture(uuid, timeout, x, y, z, heading, filenam
 ---@param sizeX number?
 ---@param sizeY number?
 ---@param delay number?
----@param renderFlags ArgusRenderFlags? Overrides this drawer's renderFlags for this call.
+---@param renderFlags ArgusRenderFlags? Overrides the default Argus2.RenderFlags.FLAG_RENDER_UI for this call.
 ---@return boolean success True if update succeeded.
 function ShapeDrawer:updateTimedCameraFacingTexture(uuid, timeout, x, y, z, heading, filename, imageSizeX, imageSizeY, sizeX, sizeY, delay, renderFlags) end
 

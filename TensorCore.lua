@@ -147,13 +147,15 @@ function TensorCore.addAlertText(duration, text, scale, priority, tts) end
 ---@return ShapeDrawer
 function TensorCore.getCachedDrawer(colorStart, colorMid, colorEnd, colorOutline, outlineThickness, occlusionChannel, renderFlags) end
 
+---Returns a cached enemy-colored drawer using current Moogle Telegraphs settings, including TerrainWarpHeightOffset.
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31.
----@param renderFlags ArgusRenderFlags? Default = Argus2.RenderFlags.FLAG_WARP_TERRAIN. Render flags used by the returned drawer.
+---@param renderFlags ArgusRenderFlags? If nil, uses the current Moogle Telegraphs enemy render flags. Render flags used by the returned drawer.
 ---@return ShapeDrawer
 function TensorCore.getMoogleDrawer(occlusionChannel, renderFlags) end
 
+---Returns a cached flat enemy-colored drawer using current Moogle Telegraphs settings, including TerrainWarpHeightOffset.
 ---@param occlusionChannel integer? Default = 0. Raw zero-based channel index; valid range is 0..31.
----@param renderFlags ArgusRenderFlags? Default = Argus2.RenderFlags.FLAG_WARP_TERRAIN. Render flags used by the returned drawer.
+---@param renderFlags ArgusRenderFlags? If nil, uses the current Moogle Telegraphs enemy render flags. Render flags used by the returned drawer.
 ---@return ShapeDrawer
 function TensorCore.getMoogleFlatDrawer(occlusionChannel, renderFlags) end
 

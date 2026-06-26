@@ -527,7 +527,6 @@ function Argus.getTimedDonutInfo(index) end
 ---@return u32color? colorStart
 ---@return u32color? colorEnd
 function Argus.getTimedDrawBaseInfo(index) end
-
 ---@param index integer
 ---@return integer? entityAttach
 ---@return integer? targetAttach
@@ -537,14 +536,16 @@ function Argus.getTimedDrawBaseInfo(index) end
 ---@return u32color? colorMid
 ---@return u32color? colorOutline
 ---@return number? outlineThickness
----@return integer? gradientIntensity
+---@return number? gradientDistance
 ---@return number? gradientMinOpacity
+---@return number? gradientIntensity
 ---@return boolean? oldDraw
 ---@return boolean? doNotDetect
 ---@return ArgusRenderFlags? renderFlags
 ---@return integer? occlusionChannel
 ---@return number? pitch
 ---@return number? roll
+---@return number? heightOffset
 function Argus.getTimedDrawOptArgs(index) end
 
 ---@param index integer
