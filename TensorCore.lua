@@ -136,6 +136,12 @@ function TensorCore.sendParsedChatMessage(msg) end
 ---@param tts boolean
 function TensorCore.addAlertText(duration, text, scale, priority, tts) end
 
+---Displays an in-game raid warning, similar to the game's built-in raid alerts.
+---@param text string Text to display.
+---@param warningType integer Raid warning type. 0 = Danger, 1 = Info.
+---@param duration number Duration in seconds.
+function TensorCore.showRaidWarning(text, warningType, duration) end
+
 ---Returns a cached drawer for the given drawing settings. The returned drawer may be modified freely.
 ---@param colorStart u32color? If not using timed draws, this can be left nil, only colorEnd will be used for frame draws
 ---@param colorMid u32color? If not specified, colorMid is ignored in timed draws and goes colorStart -> colorEnd. Frame draws only use colorEnd
