@@ -253,6 +253,13 @@ function TensorCore.API.TensorACR.holdActionUntil(id, time, numCharges) end
 ---@param numCharges? integer|nil
 function TensorCore.API.TensorACR.holdActionFor(id, seconds, numCharges) end
 
+---Adjusts the effective cast range of an action.
+---The specified value is added to the action's original range.
+---Pass 0 to restore the default range.
+---@param spellID integer Action ID.
+---@param value number Range adjustment in yalms.
+function TensorCore.API.TensorACR.setActionRangeAdjustByID(spellID, value) end
+
 ---ACR toggle manipulation.
 ---Example usage: TensorCore.API.TensorACR.setHotbarEnabled("ACR_TensorMagnum3_Hotbar_DutyAction1", false)
 ---@param var string
