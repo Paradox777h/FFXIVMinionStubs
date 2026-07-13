@@ -1283,7 +1283,7 @@ function GUI:DragIntRange2(label, v_current_min, v_current_max, v_speed, v_min, 
 ---Returns: string text, bool changed
 ---@param label string
 ---@param text string
----@param flags integer
+---@param flags? integer
 ---@return string text
 ---@return boolean changed
 function GUI:InputText(label, text, flags) end

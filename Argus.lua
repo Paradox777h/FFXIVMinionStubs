@@ -69,6 +69,7 @@
 ---@alias onMapEffectFunc fun(a1: integer, a2: integer, a3: integer)
 ---@alias onMarkerAddFunc fun(entityID: integer, markerType: integer)
 ---@alias onTetherChangeFunc fun(sourceEntityID: integer, oldTetherID: integer, oldTetherFlags: integer, oldTargetID: integer, newTetherID: integer, newTetherFlags: integer, newTargetID: integer)
+---@alias onAddGroundEffectFunc fun(entityID: integer, type: integer, flags: integer, type2: integer, keyID: integer, a1: integer, a2: integer, a4: integer, ownerID: integer, a3: integer, radius: number, heading: number, flags2: integer, type3: integer, state: integer, a5: integer, x: number, y: number, z: number)
 
 ---Known castType values: [2,5,7] Circle AOE; [3,13] Directional Cone/arc AOE; [4,12] Directional Line AOE; [6] Meteor mechanic; [8] Line AOE targeted to a position or entity; [10] Donut AOE; [11] Cross AOE.
 castType = {}
@@ -424,6 +425,10 @@ function Argus.registerOnMarkerAdd(func) end
 ---Registers func into on tether change func list. Called any time tether id, tether flags, or tether target id changes for a given entity. Must be called in your Module.Initialize handler.
 ---@param func onTetherChangeFunc
 function Argus.registerOnTetherChange(func) end
+
+---Registers func into the ground effect callback list. Called whenever the client receives a ground effect creation packet. Must be called in your Module.Initialize handler.
+---@param func onAddGroundEffectFunc
+function Argus.registerOnAddGroundEffectFunc(func) end
 
 ---Set misdirection heading. For buffs where the finger points above the player's head and can be adjusted with movement.
 ---@param value number Heading in radians, between -pi and +pi, same format as the game.

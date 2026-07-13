@@ -260,6 +260,15 @@ function TensorCore.API.TensorACR.holdActionFor(id, seconds, numCharges) end
 ---@param value number Range adjustment in yalms.
 function TensorCore.API.TensorACR.setActionRangeAdjustByID(spellID, value) end
 
+---Gets the next positional requirement and the absolute time it should be reached.
+---@return "none"|"flank"|"rear" position
+---@return number time Absolute Now()-based timestamp for the next positional.
+function TensorCore.API.TensorACR.getNextPositional() end
+
+---@param spellID integer
+---@param enabled boolean If true, blacklists the spell from Ignore Dash Movement. If false, removes it from the blacklist.
+function TensorCore.API.TensorACR.setIgnoreDashSpellBlacklist(spellID, enabled) end
+
 ---ACR toggle manipulation.
 ---Example usage: TensorCore.API.TensorACR.setHotbarEnabled("ACR_TensorMagnum3_Hotbar_DutyAction1", false)
 ---@param var string

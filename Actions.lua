@@ -45,9 +45,12 @@ function Action:IsFacing(targetId) end
 ---@return integer|boolean
 function Action:CanCastResult(targetId) end
 
----@param targetId? integer
+---Casts the action.
+---@overload fun(self: Action): boolean|integer
+---@overload fun(self: Action, targetID: integer): boolean|integer
+---@overload fun(self: Action, x: number, y: number, z: number): boolean|integer
 ---@return boolean|integer
-function Action:Cast(targetId) end
+function Action:Cast(...) end
 
 ---@class ActionList
 ActionList = ActionList or {}
