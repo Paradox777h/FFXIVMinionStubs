@@ -74,39 +74,6 @@
 ---Known castType values: [2,5,7] Circle AOE; [3,13] Directional Cone/arc AOE; [4,12] Directional Line AOE; [6] Meteor mechanic; [8] Line AOE targeted to a position or entity; [10] Donut AOE; [11] Cross AOE.
 castType = {}
 
----Returns table of all currently active AOEs.
----@return GroundAOE[]|DirectionalAOE[] aoes
-function Argus.getAllAOE() end
-
----Returns the current number of active AOEs.
----@return integer count
-function Argus.getNumAOE() end
-
----Returns all currently active AOEs including those with no entity attachment.
----@return GroundAOE[]|DirectionalAOE[] aoes
-function Argus.getAllActiveAOE() end
-
----Returns tether info for the given entity.
----@param entityID integer
----@return TetherInfo|nil tether
-function Argus.getEntityTether(entityID) end
-
----Returns the number of tethers for this entity.
----@param entityID integer
----@return integer count
-function Argus.getNumEntityTethers(entityID) end
-
----Returns the tether at the given index for this entity (0-based).
----@param entityID integer
----@param index integer
----@return TetherInfo|nil tether
-function Argus.getEntityTetherByIndex(entityID, index) end
-
-
----Returns the current map/territory ID.
----@return integer mapID
-function Argus.getMapID() end
-
 ---@class Argus
 Argus = Argus or {}
 
