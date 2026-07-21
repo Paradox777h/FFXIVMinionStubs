@@ -410,8 +410,47 @@ function TensorCore.API.TensorACR.setTankbarMouseWorldPos(var, x, y, z) end
 ---@param z number
 function TensorCore.API.TensorACR.setHealbarMouseWorldPos(var, x, y, z) end
 
+---Returns whether the currently drawn Minor Arcana is Lord of Crowns.
+---This function resolves to the currently loaded ACR module (for example, RikuAST3 when playing Astrologian).
+---@return boolean drawn
+function TensorCore.API.TensorACR.isLordOfCrownsDrawn() end
+
+---Returns whether the currently drawn Minor Arcana is Lady of Crowns.
+---This function resolves to the currently loaded ACR module (for example, RikuAST3 when playing Astrologian).
+---@return boolean drawn
+function TensorCore.API.TensorACR.isLadyOfCrownsDrawn() end
+
+---Returns whether the active Red Mage ACR is currently in a melee combo.
+---When `meleeOnly` is true, only the melee weaponskill combo is considered.
+---Verflare, Verholy, Scorch, and Resolution do not count.
+---@param meleeOnly? boolean
+---@return boolean inCombo
+function TensorCore.API.TensorACR.inMeleeCombo(meleeOnly) end
+
+---Prevents Arcane Crest from being automatically used in response to the specified enemy action.
+---@param spellID integer Action ID to blacklist.
+function TensorCore.API.TensorACR.addArcaneCrestBlacklistEntry(spellID) end
+
+---Removes an enemy action from the Arcane Crest blacklist.
+---@param spellID integer Action ID to remove.
+function TensorCore.API.TensorACR.removeArcaneCrestBlacklistEntry(spellID) end
+
+---Prevents Third Eye from being automatically used in response to the specified enemy action.
+---@param spellID integer Action ID to blacklist.
+function TensorCore.API.TensorACR.addThirdEyeBlacklistEntry(spellID) end
+
+---Removes an enemy action from the Third Eye blacklist.
+---@param spellID integer Action ID to remove.
+function TensorCore.API.TensorACR.removeThirdEyeBlacklistEntry(spellID) end
+
 ---@class Avoidance
 TensorCore.Avoidance = TensorCore.Avoidance or {}
+
+---Returns whether the specified target can be safely dashed to without intersecting avoidable AOEs.
+---@param target Entity|integer Target entity or entity ID. !! THIS NEEDS CHECKING
+---@param checkReturn? boolean Also verify that the return path is safe.
+---@return boolean safe
+function TensorCore.Avoidance.canSafeDash(target, checkReturn) end
 
 ---@param x number
 ---@param y number

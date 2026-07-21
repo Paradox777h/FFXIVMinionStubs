@@ -27,6 +27,11 @@ gSkipCutscene = gSkipCutscene or false
 ---@type boolean
 gSkipUnsafeCutscene = gSkipUnsafeCutscene or false
 
+---Returns the name for a given map id
+---@param id integer
+---@return string
+function GetMapName(id) end
+
 ---Executes a text command as if it were entered into the in-game chat.
 ---Examples include slash commands such as /e, /p, etc
 ---@param command string Text command to execute.

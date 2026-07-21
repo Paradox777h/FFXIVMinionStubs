@@ -1745,7 +1745,7 @@ function GUI:OpenPopup(id) end
 ---Returns: bool open
 ---return true if popup if opened and start outputting to it. only call EndPopup() if BeginPopup() returned true!
 ---@param id string
----@param flags integer
+---@param flags? integer
 ---@return boolean open
 function GUI:BeginPopup(id, flags) end
 
@@ -1753,7 +1753,7 @@ function GUI:BeginPopup(id, flags) end
 ---modal dialog (can't close them by clicking outside)
 ---@param name string
 ---@param opened boolean
----@param flags integer
+---@param flags? integer
 ---@return boolean visible
 ---@return boolean open
 function GUI:BeginPopupModal(name, opened, flags) end
