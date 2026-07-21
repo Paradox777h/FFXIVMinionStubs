@@ -446,12 +446,6 @@ function TensorCore.API.TensorACR.removeThirdEyeBlacklistEntry(spellID) end
 ---@class Avoidance
 TensorCore.Avoidance = TensorCore.Avoidance or {}
 
----Returns whether the specified target can be safely dashed to without intersecting avoidable AOEs.
----@param target Entity|integer Target entity or entity ID. !! THIS NEEDS CHECKING
----@param checkReturn? boolean Also verify that the return path is safe.
----@return boolean safe
-function TensorCore.Avoidance.canSafeDash(target, checkReturn) end
-
 ---@param x number
 ---@param y number
 ---@param z number
