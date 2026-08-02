@@ -23,22 +23,6 @@
 ---@field aoeEffectRestrictYScale boolean If true, the aoe will be 10% of its original size. Argus already adjusts the original aoe size values correctly, so this field can generally be ignored.
 ---@field aoeEffectLargeScale integer Some value that changes internal orientation for drawing telegraph effects. Argus already handles this internally, so it can generally be ignored.
 
----@class DirectionalAOE Structure for Directional AOEs that are usually originating from an entity.
----@field x number X position of aoe.
----@field y number Y position of aoe.
----@field z number Z position of aoe.
----@field aoeType integer Animation/omen type of aoe.
----@field heading number Direction the aoe is facing.
----@field aoeLength integer Length of aoe.
----@field aoeWidth integer Width of aoe, mostly used for Line aoes. This value is 0 for cones and circles.
----@field aoeName string Name of aoe.
----@field aoeID number Cast/Spell ID of aoe.
----@field aoeCastType number Cast type/shape of AOE. See castType for known values.
----@field targetAttach integer|nil ID of entity that current aoe is attached to, if found. Value is nil otherwise.
----@field aoeAnimationInfo aoeAnimationInfo Contains information about the animation that will play when the aoe completes and gets casted.
----@field aoeEffectInfo aoeEffectInfo Contains information about the aoe's omen/telegraph.
----@field isAreaTarget boolean If the spell is a free target ability or not; useful for identifying aoes that will attach to target or not.
-
 ---@class GroundAOE Structure for Ground AOEs that are not usually attached to any entity.
 ---@field x number X position of aoe.
 ---@field y number Y position of aoe.
@@ -53,6 +37,9 @@
 ---@field aoeAnimationInfo aoeAnimationInfo Contains information about the animation that will play when the aoe completes and gets casted.
 ---@field aoeEffectInfo aoeEffectInfo Contains information about the aoe's omen/telegraph.
 ---@field isAreaTarget boolean If the spell is a free target ability or not; useful for identifying aoes that will attach to target or not.
+
+---@class DirectionalAOE : GroundAOE Structure for directional AOEs that are usually originating from an entity.
+---@field heading number Direction the AOE is facing.
 
 ---@class TetherInfo
 ---@field type integer Tether type/id.

@@ -192,6 +192,37 @@ function TensorCore.getStaticFlatDrawer(color, outlineThickness, occlusionChanne
 ---@return ShapeDrawer
 function TensorCore.getCachedFlatDrawer(colorStart, colorMid, colorEnd, colorOutline, outlineThickness, occlusionChannel, renderFlags) end
 
+---Returns the number of available Occult Crescent phantom jobs.
+---@return integer jobCount
+function TensorCore.getOccultCrescentJobCount() end
+
+---Returns the player's current Occult Crescent progression information.
+---@return integer currentJobIndex
+---@return integer knowledgeLevel
+---@return integer syncedKnowledgeLevel
+---@return integer effectiveKnowledgeLevel
+---@return integer knowledgeLevelSyncTarget
+---@return integer knowledgeExperience
+---@return integer remainingKnowledgeExperience
+---@return integer remainingPhantomJobExperience
+function TensorCore.getOccultCrescentInfo() end
+
+---Returns information about an Occult Crescent phantom job.
+---@param jobIndex integer
+---@return integer level
+---@return integer experience
+---@return integer remainingExperience
+---@return integer maxLevel
+---@return boolean isCurrent
+---@return string name
+---@return string description
+function TensorCore.getOccultCrescentJobInfo(jobIndex) end
+
+---Returns the amount of an Occult Crescent currency.
+---@param currencyIndex integer 0 = silver, 1 = gold, 2 = Sanguine Cipher or Arcane Amulet, 3 = Forked Tower Priority.
+---@return integer amount
+function TensorCore.getOccultCrescentCurrencyInfo(currencyIndex) end
+
 ---@class TensorCoreAPI
 TensorCore.API = TensorCore.API or {}
 
@@ -252,6 +283,9 @@ function TensorCore.API.TensorACR.holdActionUntil(id, time, numCharges) end
 ---@param seconds number
 ---@param numCharges? integer|nil
 function TensorCore.API.TensorACR.holdActionFor(id, seconds, numCharges) end
+
+---Clears all currently active action holds for the loaded ACR.
+function TensorCore.API.TensorACR.resetAllHoldActions() end
 
 ---Adjusts the effective cast range of an action.
 ---The specified value is added to the action's original range.
@@ -471,3 +505,9 @@ function TensorCore.Avoidance.inUnavoidableAOE(id) end
 ---@return number y
 ---@return number z
 function TensorCore.Avoidance.predictOrbitPosition(c_x, c_y, c_z, origin_x, origin_y, origin_z, speed, dir_x, dir_y, dir_z, time) end
+
+---Returns the heading from a source position toward one or more destination positions.
+---@param sourcePos Vector3 Source position.
+---@param ... Vector3 One or more destination positions.
+---@return number heading Heading in radians.
+function TensorCore.Avoidance.getHeadingBetweenPos(sourcePos, ...) end

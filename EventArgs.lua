@@ -7,8 +7,8 @@
 ---@field code integer Chat channel/type code.
 ---@field subcode integer Chat subtype code.
 
----@class AOECreateEventArgs
----@field aoe GroundAOE|DirectionalAOE
+---@class AOECreateEventArgs : GroundAOE
+---@field heading number|nil Direction the AOE is facing. Present for directional AOEs.
 
 ---@class EntityCastEventArgs
 ---@field entityID integer
